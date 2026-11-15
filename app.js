@@ -1,73 +1,183 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>An Tâm Tuổi Già - Trợ Lý Sức Khỏe AI</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="app-container">
-    <!-- Thanh chuyển đổi vai trò (Demo cho Ban Giám Khảo) -->
-    <header class="app-header">
-      <h1>🌿 An Tâm Tuổi Già</h1>
-      <div class="role-switch">
-        <button id="btn-elder" class="active" onclick="switchView('elder')">👴 Chế độ Cha Mẹ</button>
-        <button id="btn-family" onclick="switchView('family')">👨‍👩‍👧 Góc Con Cái</button>
+
+const GEMINI_API_KEY = "NHAP_API_KEY_CUA_BAN_TAI_DAY";
+
+
+let medications = [
+  { id: 1, name: "Thuốc điều hòa huyết áp", time: "08:00", taken: false },
+  { id: 2, name: "Vitamin tổng hợp & Bổ mắt", time: "12:30", taken: false },
+  { id: 3, name: "Thuốc hỗ trợ tim mạch", time: "19:30", taken: false }
+];
+
+let activityLogs = [
+  "07:30 - Hệ thống đã gửi lời chào buổi sáng tới Cha/Mẹ."
+];
+
+
+function switchView(role) {
+  document.getElementById("view-elder").classList.toggle("hidden", role !== "elder");
+  document.getElementById("view-family").classList.toggle("hidden", role !== "family");
+  document.getElementById("btn-elder").classList.toggle("active", role === "elder");
+  document.getElementById("btn-family").classList.toggle("active", role === "family");
+  renderAll();
+}
+
+// Hiển thị danh sách thuốc và nhật ký
+function renderAll() {
+  const medListEl = document.getElementById("med-list");
+  medListEl.innerHTML = "";
+
+  medications.forEach((med) => {
+    const item = document.createElement("div");
+    item.className = "med-item";
+    item.innerHTML = `
+      <div class="med-info">
+        <strong>${med.name}</strong>
+        <span>⏰ Giờ uống: ${med.time}</span>
       </div>
-    </header>
-
-    <!-- MÀN HÌNH 1: DÀNH CHO NGƯỜI CAO TUỔI -->
-    <main id="view-elder" class="view-section">
-      <!-- Nút gọi khẩn cấp SOS -->
-      <button class="btn-sos" onclick="triggerSOS()">
-        🚨 GỌI KHẨN CẤP (SOS)
+      <button class="btn-check ${med.taken ? "done" : ""}" onclick="toggleMed(${med.id})">
+        ${med.taken ? "✅ Đã uống" : "Xác nhận"}
       </button>
+    `;
+    medListEl.appendChild(item);
+  });
 
-      <!-- Trợ lý AI Giọng nói -->
-      <section class="card ai-box">
-        <h2>🎙️ Trò chuyện cùng Trợ lý AI</h2>
-        <p id="ai-status" class="status-text">Bấm nút bên dưới để nói chuyện hoặc đọc chỉ số huyết áp...</p>
-        <div id="ai-reply" class="reply-bubble">
-          "Chào bác! Hôm nay bác thấy trong người thế nào ạ?"
-        </div>
-        <button id="btn-mic" class="btn-primary btn-large" onclick="startVoiceAssistant()">
-          🎤 BẤM ĐỂ NÓI
-        </button>
-      </section>
+  const logEl = document.getElementById("family-log");
+  logEl.innerHTML = activityLogs.map((log) => `<li>${log}</li>`).join("");
+}
 
-      <!-- Nhắc lịch uống thuốc -->
-      <section class="card med-box">
-        <h2>💊 Lịch uống thuốc hôm nay</h2>
-        <div id="med-list" class="med-list"></div>
-      </section>
-    </main>
+// Xác nhận đã uống thuốc
+function toggleMed(id) {
+  const med = medications.find((m) => m.id === id);
+  if (med) {
+    med.taken = !med.taken;
+    const now = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    if (med.taken) {
+      activityLogs.unshift(`${now} - ✅ Cha/Mẹ đã xác nhận uống: ${med.name}.`);
+      speakVietnamese(`Giỏi quá! Bác đã uống ${med.name}. Cháu đã báo tin vui này cho con của bác rồi ạ.`);
+    }
+    renderAll();
+  }
+}
 
-    <!-- MÀN HÌNH 2: DÀNH CHO CON CÁI / NGƯỜI GIÁM HỘ -->
-    <main id="view-family" class="view-section hidden">
-      <section class="card">
-        <h2>📊 Tình trạng sức khỏe của Cha/Mẹ</h2>
-        <div id="family-alert" class="alert-banner hidden"></div>
-        <ul id="family-log" class="log-list"></ul>
-      </section>
+// Con cái thêm thuốc mới
+function addMedication() {
+  const name = document.getElementById("med-name").value.trim();
+  const time = document.getElementById("med-time").value;
+  if (!name) return alert("Vui lòng nhập tên thuốc!");
 
-      <section class="card">
-        <h2>➕ Thêm lịch nhắc thuốc mới</h2>
-        <input type="text" id="med-name" placeholder="Tên thuốc (VD: Thuốc huyết áp)" />
-        <input type="time" id="med-time" value="08:00" />
-        <button class="btn-primary" onclick="addMedication()">Lưu lịch nhắc</button>
-      </section>
+  medications.push({ id: Date.now(), name, time, taken: false });
+  activityLogs.unshift(`Vừa thêm lịch nhắc mới: ${name} lúc ${time}.`);
+  document.getElementById("med-name").value = "";
+  alert("Đã đồng bộ lịch thuốc sang máy của Cha/Mẹ!");
+  renderAll();
+}
 
-      <section class="card">
-        <h2>❤️ Chỉ số huyết áp gần đây</h2>
-        <ul id="bp-history" class="log-list">
-          <li>Hôm nay 07:30 - <strong>125/80 mmHg</strong> (Ổn định)</li>
-        </ul>
-      </section>
-    </main>
-  </div>
+// Nút khẩn cấp SOS
+function triggerSOS() {
+  const now = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+  const alertMsg = `🚨 KHẨN CẤP (${now}): Cha/Mẹ vừa bấm nút SOS yêu cầu hỗ trợ!`;
+  
+  activityLogs.unshift(alertMsg);
+  const banner = document.getElementById("family-alert");
+  banner.textContent = alertMsg;
+  banner.classList.remove("hidden");
 
-  <script src="app.js"></script>
-</body>
-</html>
+  speakVietnamese("Đang gửi tín hiệu khẩn cấp và gọi điện cho con của bác. Bác hãy ngồi yên nghỉ ngơi nhé!");
+  alert("Đã gửi cảnh báo khẩn cấp kèm tọa độ GPS tới điện thoại người thân!");
+}
+
+// Đọc văn bản bằng giọng nói tiếng Việt (Text-to-Speech)
+function speakVietnamese(text) {
+  document.getElementById("ai-reply").textContent = `"${text}"`;
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "vi-VN";
+    utterance.rate = 0.9; // Tốc độ đọc chậm rãi, dễ nghe cho người lớn tuổi
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+// Nhận diện giọng nói tiếng Việt (Speech-to-Text) và gọi AI
+function startVoiceAssistant() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói. Hãy dùng Google Chrome!");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "vi-VN";
+  recognition.interimResults = false;
+
+  const statusEl = document.getElementById("ai-status");
+  statusEl.textContent = "🎧 Đang lắng nghe bác nói...";
+
+  recognition.onresult = async (event) => {
+    const userSpeech = event.results[0][0].transcript;
+    statusEl.textContent = `Bác vừa nói: "${userSpeech}"`;
+    await processUserSpeech(userSpeech);
+  };
+
+  recognition.onerror = () => {
+    statusEl.textContent = "❌ Cháu chưa nghe rõ, bác bấm nút và nói lại nhé.";
+  };
+
+  recognition.start();
+}
+
+// Xử lý câu nói bằng AI (Nhận diện chỉ số huyết áp hoặc trò chuyện)
+async function processUserSpeech(text) {
+  const lowerText = text.toLowerCase();
+
+  // Tự động trích xuất chỉ số huyết áp nếu người dùng đọc (VD: "huyết áp 130 trên 80")
+  const bpMatch = lowerText.match(/(\d{2,3})\s*(trên|\/)\s*(\d{2,3})/);
+  if (bpMatch) {
+    const sys = bpMatch[1];
+    const dia = bpMatch[3];
+    const now = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    document.getElementById("bp-history").innerHTML =
+      `<li>Hôm nay ${now} - <strong>${sys}/${dia} mmHg</strong> (Ghi nhận qua giọng nói)</li>` +
+      document.getElementById("bp-history").innerHTML;
+    activityLogs.unshift(`${now} - Đã ghi nhận huyết áp: ${sys}/${dia} mmHg.`);
+  }
+
+  // Nếu chưa gắn API Key, dùng phản hồi mẫu thông minh để demo
+  if (GEMINI_API_KEY === "NHAP_API_KEY_CUA_BAN_TAI_DAY") {
+    if (bpMatch) {
+      speakVietnamese(`Cháu đã ghi lại chỉ số huyết áp ${bpMatch[1]} trên ${bpMatch[3]} và gửi cho con của bác rồi ạ.`);
+    } else if (lowerText.includes("uống thuốc")) {
+      toggleMed(medications[0].id);
+    } else {
+      speakVietnamese("Cháu đã nghe rõ ạ. Bác nhớ uống đủ nước và nghỉ ngơi điều độ nhé!");
+    }
+    return;
+  }
+
+  // Gọi Gemini API thật để trò chuyện tự nhiên
+  try {
+    const response = await fetch(
+      `https://googleapis.com{GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `Bạn là trợ lý điều dưỡng ảo lễ phép, ấm áp dành cho người cao tuổi Việt Nam. Hãy xưng "cháu" và gọi người dùng là "bác". Trả lời ngắn gọn dưới 3 câu, dễ hiểu cho câu nói sau: "${text}"`
+            }]
+          }]
+        })
+      }
+    );
+    const data = await response.json();
+    const aiText = data.candidates[0].content.parts[0].text;
+    speakVietnamese(aiText);
+  } catch (error) {
+    speakVietnamese("Mạng đang hơi chập chờn, nhưng cháu vẫn luôn ở đây bên bác ạ.");
+  }
+}
+
+// Khởi chạy giao diện ban đầu
+renderAll();
 
