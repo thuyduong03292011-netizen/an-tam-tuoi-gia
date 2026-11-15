@@ -1,7 +1,7 @@
-
+// Dán API Key của Google Gemini tại đây (Lấy miễn phí tại ://google.com)
 const GEMINI_API_KEY = "NHAP_API_KEY_CUA_BAN_TAI_DAY";
 
-
+// Dữ liệu mẫu ban đầu
 let medications = [
   { id: 1, name: "Thuốc điều hòa huyết áp", time: "08:00", taken: false },
   { id: 2, name: "Vitamin tổng hợp & Bổ mắt", time: "12:30", taken: false },
@@ -12,7 +12,7 @@ let activityLogs = [
   "07:30 - Hệ thống đã gửi lời chào buổi sáng tới Cha/Mẹ."
 ];
 
-
+// Chuyển đổi qua lại giữa màn hình Cha Mẹ và Con Cái
 function switchView(role) {
   document.getElementById("view-elder").classList.toggle("hidden", role !== "elder");
   document.getElementById("view-family").classList.toggle("hidden", role !== "family");
@@ -93,7 +93,7 @@ function speakVietnamese(text) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "vi-VN";
-    utterance.rate = 0.9; // Tốc độ đọc chậm rãi, dễ nghe cho người lớn tuổi
+    utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   }
 }
@@ -119,8 +119,8 @@ function startVoiceAssistant() {
     await processUserSpeech(userSpeech);
   };
 
-  recognition.onerror = () => {
-    statusEl.textContent = "❌ Cháu chưa nghe rõ, bác bấm nút và nói lại nhé.";
+  recognition.onerror = (event) => {
+    statusEl.textContent = `❌ Cháu chưa nghe rõ (Lỗi: ${event.error}), bác bấm nút và nói lại nhé.`;
   };
 
   recognition.start();
@@ -143,11 +143,16 @@ async function processUserSpeech(text) {
   }
 
   // Nếu chưa gắn API Key, dùng phản hồi mẫu thông minh để demo
-  if (GEMINI_API_KEY === "NHAP_API_KEY_CUA_BAN_TAI_DAY") {
+  if (GEMINI_API_KEY === "NHAP_API_KEY_CUA_BAN_TAI_DAY" || !GEMINI_API_KEY) {
     if (bpMatch) {
       speakVietnamese(`Cháu đã ghi lại chỉ số huyết áp ${bpMatch[1]} trên ${bpMatch[3]} và gửi cho con của bác rồi ạ.`);
     } else if (lowerText.includes("uống thuốc")) {
-      toggleMed(medications[0].id);
+      const nextMed = medications.find((m) => !m.taken);
+      if (nextMed) {
+        toggleMed(nextMed.id);
+      } else {
+        speakVietnamese("Hôm nay bác đã uống đủ tất cả các loại thuốc rồi ạ!");
+      }
     } else {
       speakVietnamese("Cháu đã nghe rõ ạ. Bác nhớ uống đủ nước và nghỉ ngơi điều độ nhé!");
     }
@@ -180,4 +185,5 @@ async function processUserSpeech(text) {
 
 // Khởi chạy giao diện ban đầu
 renderAll();
+
 
