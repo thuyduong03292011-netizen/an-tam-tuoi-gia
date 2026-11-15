@@ -1,1 +1,194 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f0f4f8;
+  display: flex;
+  justify-content: center;
+  color: #1a202c;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  color: #2b6cb0;
+  margin-bottom: 10px;
+}
+
+.role-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.role-switch button {
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  border: 2px solid #2b6cb0;
+  background: #ffffff;
+  color: #2b6cb0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.role-switch button.active {
+  background: #2b6cb0;
+  color: #ffffff;
+}
+
+.hidden {
+  display: none;
+}
+
+.card {
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #1e293b;
+}
+
+/* Nút SOS siêu nổi bật */
+.btn-sos {
+  width: 100%;
+  padding: 20px;
+  font-size: 22px;
+  font-weight: 800;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4);
+}
+
+.btn-sos:active {
+  background-color: #991b1b;
+}
+
+/* Nút bấm chính cỡ lớn */
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-large {
+  padding: 20px;
+  font-size: 22px;
+}
+
+.reply-bubble {
+  background: #e0f2fe;
+  border-left: 5px solid #0284c7;
+  padding: 14px;
+  font-size: 19px;
+  line-height: 1.5;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.status-text {
+  font-size: 16px;
+  color: #475569;
+}
+
+/* Danh sách thuốc */
+.med-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.med-info strong {
+  font-size: 19px;
+  display: block;
+}
+
+.med-info span {
+  font-size: 16px;
+  color: #64748b;
+}
+
+.btn-check {
+  padding: 12px 16px;
+  font-size: 17px;
+  font-weight: bold;
+  border-radius: 10px;
+  border: none;
+  background: #f59e0b;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-check.done {
+  background: #16a34a;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+}
+
+.log-list {
+  list-style: none;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.log-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.alert-banner {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
 
